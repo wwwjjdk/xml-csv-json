@@ -1,5 +1,6 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.opencsv.CSVReader;
@@ -9,7 +10,10 @@ import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -53,6 +57,9 @@ public class Main {
         List<Employee> lastEmployeeList = parseXML("data.xml");
         String json2 =listToJson(lastEmployeeList);
         writeString(json2, "data2.json");
+
+        readStringAndJsonToList("data2.json");
+
     }
 
     public static List<Employee> parseCSV(String [] columnMapping, String name){
@@ -159,6 +166,28 @@ public class Main {
 
         }
         return employees;
+      }
+
+      public static void readStringAndJsonToList(String string) {
+        JSONParser parser = new JSONParser();
+        List <Employee> employees = new ArrayList<>();
+
+        try{
+            Object obj = parser.parse(new FileReader(string));
+            JSONArray jsonArray = (JSONArray) obj;// получаю массив данных формата json
+            //String newArray = jsonArray.toJSONString();//перевожу в string
+            GsonBuilder builder = new GsonBuilder();// создаю builder
+            Gson gson = builder.create();
+
+            jsonArray.forEach(s -> {
+                JSONObject sObj = (JSONObject) s;
+                Employee employee = gson.fromJson(String.valueOf(sObj), Employee.class);
+                employees.add(employee);
+            } );
+            System.out.println(employees);
+        }catch (IOException | ParseException e){
+            System.out.println(e.getMessage());
+        }
       }
 }
 
